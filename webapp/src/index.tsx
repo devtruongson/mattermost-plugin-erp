@@ -14,7 +14,9 @@ type StoreLike = {
 };
 
 type RightHandSidebarRegistration = string | {
-  id: string;
+  id?: string;
+  showRHSPlugin?: () => void;
+  toggleRHSPlugin?: () => void;
 };
 
 type PluginRegistry = {
@@ -236,16 +238,29 @@ export default class Plugin {
       'ERP'
     );
     const rhsComponentId = typeof rhsRegistration === 'string' ? rhsRegistration : rhsRegistration.id;
-
-    registry.registerChannelHeaderButtonAction(
-      <ERPIcon />,
+    const openRhs = typeof rhsRegistration === 'string' ?
       () => {
+        store.dispatch({
+          type: UPDATE_RHS_STATE,
+          state: RHS_PLUGIN_STATE,
+          pluggableId: rhsRegistration,
+        });
+      } :
+      rhsRegistration.showRHSPlugin ?? rhsRegistration.toggleRHSPlugin ?? (() => {
+        if (!rhsComponentId) {
+          return;
+        }
+
         store.dispatch({
           type: UPDATE_RHS_STATE,
           state: RHS_PLUGIN_STATE,
           pluggableId: rhsComponentId,
         });
-      },
+      });
+
+    registry.registerChannelHeaderButtonAction(
+      <ERPIcon />,
+      openRhs,
       'Mo ERP',
       'ERP'
     );
