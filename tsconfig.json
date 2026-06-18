@@ -6,6 +6,8 @@
     "jsx": "react",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
@@ -13,4 +15,3 @@
     "webapp/src/**/*"
   ]
 }
-

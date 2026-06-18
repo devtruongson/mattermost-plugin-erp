@@ -1,9 +1,30 @@
+import manifest from '../../plugin.json';
 import React from 'react';
 
-const PLUGIN_ID = 'mattermost-plugin-erp';
 const ERP_URL = 'https://erp.fstack.asia';
 const RHS_PLUGIN_STATE = 'plugin';
 const UPDATE_RHS_STATE = 'UPDATE_RHS_STATE';
+
+type StoreLike = {
+  dispatch: (action: {
+    type: string;
+    state: string;
+    pluginId: string;
+  }) => void;
+};
+
+type PluginRegistry = {
+  registerRightHandSidebarComponent: (
+    component: React.ComponentType,
+    title: string,
+  ) => string;
+  registerChannelHeaderButtonAction: (
+    icon: React.ReactElement,
+    action: () => void,
+    dropdownText: string,
+    tooltipText: string,
+  ) => void;
+};
 
 const styles: Record<string, React.CSSProperties> = {
   shell: {
@@ -204,8 +225,8 @@ const ERPIcon = () => (
   </span>
 );
 
-class Plugin {
-  initialize(registry: any, store: any) {
+export default class Plugin {
+  initialize(registry: PluginRegistry, store: StoreLike) {
     const rhsComponentId = registry.registerRightHandSidebarComponent(
       ERPEmbed,
       'ERP'
@@ -226,4 +247,10 @@ class Plugin {
   }
 }
 
-(window as any).registerPlugin(PLUGIN_ID, new Plugin());
+declare global {
+  interface Window {
+    registerPlugin(pluginId: string, plugin: Plugin): void;
+  }
+}
+
+window.registerPlugin(manifest.id, new Plugin());
