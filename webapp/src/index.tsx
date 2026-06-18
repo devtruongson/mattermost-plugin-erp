@@ -2,6 +2,8 @@ import React from 'react';
 
 const PLUGIN_ID = 'mattermost-plugin-erp';
 const ERP_URL = 'https://erp.fstack.asia';
+const RHS_PLUGIN_STATE = 'plugin';
+const UPDATE_RHS_STATE = 'UPDATE_RHS_STATE';
 
 const styles: Record<string, React.CSSProperties> = {
   shell: {
@@ -184,10 +186,41 @@ const ERPEmbed = () => {
   );
 };
 
+const ERPIcon = () => (
+  <span
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 20,
+      height: 20,
+      color: '#166de0',
+      fontSize: 11,
+      fontWeight: 700,
+      lineHeight: '20px',
+    }}
+  >
+    ERP
+  </span>
+);
+
 class Plugin {
-  initialize(registry: any) {
-    registry.registerRightHandSidebarComponent(
+  initialize(registry: any, store: any) {
+    const rhsComponentId = registry.registerRightHandSidebarComponent(
       ERPEmbed,
+      'ERP'
+    );
+
+    registry.registerChannelHeaderButtonAction(
+      <ERPIcon />,
+      () => {
+        store.dispatch({
+          type: UPDATE_RHS_STATE,
+          state: RHS_PLUGIN_STATE,
+          pluginId: rhsComponentId,
+        });
+      },
+      'Mo ERP',
       'ERP'
     );
   }
