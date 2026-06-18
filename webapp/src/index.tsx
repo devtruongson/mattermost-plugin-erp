@@ -2,22 +2,18 @@ import manifest from '../../plugin.json';
 import React from 'react';
 
 const ERP_URL = 'https://erp.fstack.asia';
-const RHS_PLUGIN_STATE = 'plugin';
-const UPDATE_RHS_STATE = 'UPDATE_RHS_STATE';
 
 type StoreLike = {
-  dispatch: (action: {
-    type: string;
-    state: string;
-    pluginId: string;
-  }) => void;
+  dispatch: (action: unknown) => void;
 };
 
 type PluginRegistry = {
   registerRightHandSidebarComponent: (
     component: React.ComponentType,
     title: string,
-  ) => string;
+  ) => {
+    toggleRHSPlugin: unknown;
+  };
   registerChannelHeaderButtonAction: (
     icon: React.ReactElement,
     action: () => void,
@@ -227,7 +223,7 @@ const ERPIcon = () => (
 
 export default class Plugin {
   initialize(registry: PluginRegistry, store: StoreLike) {
-    const rhsComponentId = registry.registerRightHandSidebarComponent(
+    const {toggleRHSPlugin} = registry.registerRightHandSidebarComponent(
       ERPEmbed,
       'ERP'
     );
@@ -235,11 +231,7 @@ export default class Plugin {
     registry.registerChannelHeaderButtonAction(
       <ERPIcon />,
       () => {
-        store.dispatch({
-          type: UPDATE_RHS_STATE,
-          state: RHS_PLUGIN_STATE,
-          pluginId: rhsComponentId,
-        });
+        store.dispatch(toggleRHSPlugin);
       },
       'Mo ERP',
       'ERP'
