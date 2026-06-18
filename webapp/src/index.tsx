@@ -231,7 +231,7 @@ const ERPIcon = () => (
 );
 
 export default class Plugin {
-    initialize(registry: PluginRegistry) {
+    initialize(registry: PluginRegistry, store: any) {
         const rhsRegistration = registry.registerRightHandSidebarComponent(
             ERPEmbed,
             "ERP",
@@ -249,6 +249,17 @@ export default class Plugin {
         registry.registerChannelHeaderButtonAction(
             <ERPIcon />,
             () => {
+                // DEBUG — xem rhsRegistration trả về gì
+                console.log("[ERP] rhsRegistration:", rhsRegistration);
+                console.log(
+                    "[ERP] showRHSPlugin:",
+                    (rhsRegistration as any).showRHSPlugin,
+                );
+                console.log(
+                    "[ERP] toggleRHSPlugin:",
+                    (rhsRegistration as any).toggleRHSPlugin,
+                );
+
                 if (typeof rhsRegistration !== "string") {
                     const fn =
                         rhsRegistration.showRHSPlugin ??
