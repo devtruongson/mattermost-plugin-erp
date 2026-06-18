@@ -1,15 +1,15 @@
 import React from "react";
+import type { Store } from "redux";
 import manifest from "../../plugin.json";
 
 const ERP_URL = "https://erp.fstack.asia";
 
-type RightHandSidebarRegistration =
-    | string
-    | {
-          id?: string;
-          showRHSPlugin?: () => void;
-          toggleRHSPlugin?: () => void;
-      };
+type RightHandSidebarRegistration = {
+    id?: string;
+    showRHSPlugin?: unknown;
+    hideRHSPlugin?: () => void;
+    toggleRHSPlugin?: unknown;
+};
 
 type PluginRegistry = {
     registerRightHandSidebarComponent: (
@@ -169,7 +169,7 @@ const ERPEmbed = () => {
                         aria-label="Tải lại ERP"
                         onClick={refresh}
                     >
-                        &#8635;
+                        ↻
                     </button>
                     <button
                         type="button"
@@ -178,7 +178,7 @@ const ERPEmbed = () => {
                         aria-label="Mở ERP trong tab mới"
                         onClick={openInNewTab}
                     >
-                        &#8599;
+                        ↗
                     </button>
                 </div>
             </header>
@@ -231,43 +231,26 @@ const ERPIcon = () => (
 );
 
 export default class Plugin {
-    initialize(registry: PluginRegistry, store: any) {
+    initialize(registry: PluginRegistry, store: Store) {
         const rhsRegistration = registry.registerRightHandSidebarComponent(
             ERPEmbed,
             "ERP",
         );
 
-        // showRHSPlugin / toggleRHSPlugin đã được Mattermost bind dispatch sẵn,
-        // gọi trực tiếp như hàm thường — KHÔNG return gì để tránh Redux error #14
-        const openRhs =
-            typeof rhsRegistration !== "string"
-                ? (rhsRegistration.showRHSPlugin ??
-                  rhsRegistration.toggleRHSPlugin ??
-                  openInNewTab)
-                : openInNewTab;
-
         registry.registerChannelHeaderButtonAction(
             <ERPIcon />,
             () => {
-                // DEBUG — xem rhsRegistration trả về gì
-                console.log("[ERP] rhsRegistration:", rhsRegistration);
-                console.log(
-                    "[ERP] showRHSPlugin:",
-                    (rhsRegistration as any).showRHSPlugin,
-                );
-                console.log(
-                    "[ERP] toggleRHSPlugin:",
-                    (rhsRegistration as any).toggleRHSPlugin,
-                );
-
-                if (typeof rhsRegistration !== "string") {
-                    const fn =
-                        rhsRegistration.showRHSPlugin ??
-                        rhsRegistration.toggleRHSPlugin;
-                    if (typeof fn === "function") {
-                        fn();
-                        return;
-                    }
+                // toggleRHSPlugin: thunk     → (dispatch, getState) => ...
+                // showRHSPlugin:   object    → { type: 'UPDATE_RHS_STATE', ... }
+                // cả hai đều cần store.dispatch()
+                const action =
+                    rhsRegistration.toggleRHSPlugin ??
+                    rhsRegistration.showRHSPlugin;
+                if (action) {
+                    store.dispatch(
+                        action as Parameters<typeof store.dispatch>[0],
+                    );
+                    return;
                 }
                 openInNewTab();
             },
