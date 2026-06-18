@@ -249,8 +249,17 @@ export default class Plugin {
         registry.registerChannelHeaderButtonAction(
             <ERPIcon />,
             () => {
-                openRhs();
-            }, // void, không return
+                if (typeof rhsRegistration !== "string") {
+                    const fn =
+                        rhsRegistration.showRHSPlugin ??
+                        rhsRegistration.toggleRHSPlugin;
+                    if (typeof fn === "function") {
+                        fn();
+                        return;
+                    }
+                }
+                openInNewTab();
+            },
             "Mở ERP",
             "ERP",
         );
