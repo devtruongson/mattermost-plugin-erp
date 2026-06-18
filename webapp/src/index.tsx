@@ -7,11 +7,9 @@ type RightHandSidebarRegistration =
     | string
     | {
           id?: string;
-          showRHSPlugin?: () => unknown;
-          toggleRHSPlugin?: () => unknown;
+          showRHSPlugin?: () => void;
+          toggleRHSPlugin?: () => void;
       };
-
-type Dispatch = (action: unknown) => void;
 
 type PluginRegistry = {
     registerRightHandSidebarComponent: (
@@ -20,7 +18,7 @@ type PluginRegistry = {
     ) => RightHandSidebarRegistration;
     registerChannelHeaderButtonAction: (
         icon: React.ReactElement,
-        action: () => (dispatch: Dispatch) => void,
+        action: () => void,
         dropdownText: string,
         tooltipText: string,
     ) => void;
@@ -239,25 +237,20 @@ export default class Plugin {
             "ERP",
         );
 
-        const rhsActionCreator =
+        // showRHSPlugin / toggleRHSPlugin đã được Mattermost bind dispatch sẵn,
+        // gọi trực tiếp như hàm thường — KHÔNG return gì để tránh Redux error #14
+        const openRhs =
             typeof rhsRegistration !== "string"
                 ? (rhsRegistration.showRHSPlugin ??
-                  rhsRegistration.toggleRHSPlugin)
-                : null;
-
-        // registerChannelHeaderButtonAction expects a thunk: () => (dispatch) => void
-        // Returning a plain value (e.g. undefined from openInNewTab) causes Redux error #14
-        const thunk = () => (dispatch: Dispatch) => {
-            if (rhsActionCreator) {
-                dispatch(rhsActionCreator());
-            } else {
-                openInNewTab();
-            }
-        };
+                  rhsRegistration.toggleRHSPlugin ??
+                  openInNewTab)
+                : openInNewTab;
 
         registry.registerChannelHeaderButtonAction(
             <ERPIcon />,
-            thunk,
+            () => {
+                openRhs();
+            }, // void, không return
             "Mở ERP",
             "ERP",
         );
