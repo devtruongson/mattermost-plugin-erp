@@ -1,0 +1,10 @@
+{
+    "id": "mattermost-plugin-erp",
+    "name": "ERP",
+    "description": "Embed ERP website inside Mattermost sidebar",
+    "version": "1.0.0",
+    "min_server_version": "7.8.0",
+    "webapp": {
+        "bundle_path": "webapp/dist/main.js"
+    }
+}
