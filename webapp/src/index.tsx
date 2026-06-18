@@ -2,17 +2,6 @@ import manifest from '../../plugin.json';
 import React from 'react';
 
 const ERP_URL = 'https://erp.fstack.asia';
-const RHS_PLUGIN_STATE = 'plugin';
-const UPDATE_RHS_STATE = 'UPDATE_RHS_STATE';
-
-type StoreLike = {
-  dispatch: (action: {
-    type: string;
-    state: string;
-    pluggableId: string;
-  }) => void;
-};
-
 type RightHandSidebarRegistration = string | {
   id?: string;
   showRHSPlugin?: () => void;
@@ -146,6 +135,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
+const openInNewTab = () => {
+  window.open(ERP_URL, '_blank', 'noopener,noreferrer');
+};
+
 const ERPEmbed = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [loadKey, setLoadKey] = React.useState(0);
@@ -153,10 +146,6 @@ const ERPEmbed = () => {
   const refresh = () => {
     setIsLoading(true);
     setLoadKey((key) => key + 1);
-  };
-
-  const openInNewTab = () => {
-    window.open(ERP_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -232,31 +221,14 @@ const ERPIcon = () => (
 );
 
 export default class Plugin {
-  initialize(registry: PluginRegistry, store: StoreLike) {
+  initialize(registry: PluginRegistry) {
     const rhsRegistration = registry.registerRightHandSidebarComponent(
       ERPEmbed,
       'ERP'
     );
-    const rhsComponentId = typeof rhsRegistration === 'string' ? rhsRegistration : rhsRegistration.id;
     const openRhs = typeof rhsRegistration === 'string' ?
-      () => {
-        store.dispatch({
-          type: UPDATE_RHS_STATE,
-          state: RHS_PLUGIN_STATE,
-          pluggableId: rhsRegistration,
-        });
-      } :
-      rhsRegistration.showRHSPlugin ?? rhsRegistration.toggleRHSPlugin ?? (() => {
-        if (!rhsComponentId) {
-          return;
-        }
-
-        store.dispatch({
-          type: UPDATE_RHS_STATE,
-          state: RHS_PLUGIN_STATE,
-          pluggableId: rhsComponentId,
-        });
-      });
+      openInNewTab :
+      rhsRegistration.showRHSPlugin ?? rhsRegistration.toggleRHSPlugin ?? openInNewTab;
 
     registry.registerChannelHeaderButtonAction(
       <ERPIcon />,
